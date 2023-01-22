@@ -3,12 +3,24 @@ using System.Collections.Generic;
 
 namespace RH.Utilities.ServiceLocator
 {
-    public class Services : Singleton<Services>
+    [AttributeUsage(AttributeTargets.Field)]
+    public class InjectAttribute : Attribute
     {
+        public InjectAttribute()
+        {
+            
+        }
+    }
+    public class Services
+    {
+        private static Services _instance;
+        
         private readonly Dictionary<Type, IService> _services = new();
 
         public Services RegisterSingle<T>(T service) where T : IService
         {
+            _instance ??= new Services();
+            
             if (_services.ContainsKey(typeof(T)))
                 throw new Exception($"Already instantiated service {typeof(T)}");
 
@@ -18,7 +30,7 @@ namespace RH.Utilities.ServiceLocator
         }
 
         public static T Get<T>() where T : IService =>
-            Instance.GetSingle<T>();
+            _instance.GetSingle<T>();
 
         private T GetSingle<T>() where T : IService
         {
